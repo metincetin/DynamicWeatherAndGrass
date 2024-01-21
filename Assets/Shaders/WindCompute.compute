@@ -1,0 +1,82 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+#include "BitangentNoise.hlsl"
+#include "OpenSimplex2.hlsl"
+
+RWTexture2D<float4> Result;
+
+struct WindManipulationData
+{
+    float3 Position;
+    float Angle;
+    float Arc;
+    float2 Power;
+    float2 Radius;
+    float Time;
+};
+
+StructuredBuffer<WindManipulationData> _WindManipulationBuffer;
+
+float _NoiseScale;
+float _WindChangePower;
+float _WindFrequency;
+float _Time;
+
+void Remap(float In, float2 InMinMax, float2 OutMinMax, out float Out)
+{
+    Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
+}
+
+void Remap(float4 In, float2 InMinMax, float2 OutMinMax, out float4 Out)
+{
+    Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
+}
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    const int2 startPos = id.xy * 8;
+
+    for (int x = 0; x < 8;x++)
+    {
+        for (int y = 0; y < 8;y++){
+            int2 pos = startPos + int2(x,y);
+
+            float3 noisePos = float3(pos.x * _NoiseScale + _Time * _WindFrequency, pos.y * _NoiseScale + _Time * _WindFrequency, _Time * _WindChangePower);
+            float4 osx = openSimplex2Base(noisePos);
+            Remap(osx, float2(-5, 5), float2(0,1), osx);
+
+            for(int i = 0;i<_WindManipulationBuffer.Length;i++)
+            {
+                WindManipulationData data = _WindManipulationBuffer[i];
+                float2 f3p = float2(pos.x, pos.y);
+                float4 f4tspace;
+
+                Remap(float4(data.Position.xz, 0,0), float2(-5, 5), float2(0, 512), f4tspace);
+                float2 positionTSpace = f4tspace.xy;
+
+                float dist = distance(positionTSpace, f3p);
+                float2 dir = normalize(f3p - positionTSpace);
+
+                float radiusRemapped;
+                Remap(data.Radius.x * data.Radius.y, float2(0, 10), float2(0, 512), radiusRemapped);
+
+                radiusRemapped *= 0.5;
+
+                float falloff = 1 / distance(dist, radiusRemapped) * 25;
+
+
+                if (dist < radiusRemapped)
+                {
+                    float shape = dot(dir, float2(0,1));
+                    float d = step(data.Arc, shape);
+
+                    osx.xy += data.Power.x * data.Power.y * float4(dir, 0, 1) * falloff * d;
+                }
+            }
+
+            Result[pos] = osx;
+        }
+    }
+}
