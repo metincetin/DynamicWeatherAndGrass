@@ -45,6 +45,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
             float3 noisePos = float3(pos.x * _NoiseScale + _Time * _WindFrequency, pos.y * _NoiseScale + _Time * _WindFrequency, _Time * _WindChangePower);
             float4 osx = openSimplex2Base(noisePos);
+            osx.w = 0;
             Remap(osx, float2(-5, 5), float2(0,1), osx);
 
             for(int i = 0;i<_WindManipulationBuffer.Length;i++)
@@ -72,7 +73,8 @@ void CSMain (uint3 id : SV_DispatchThreadID)
                     float shape = dot(dir, float2(0,1));
                     float d = step(data.Arc, shape);
 
-                    osx.xy += data.Power.x * data.Power.y * float4(dir, 0, 1) * falloff * d;
+                    //osx.xy += data.Power.x * data.Power.y * float4(dir, 0, 1) * falloff * d;
+                    osx.w += data.Power.x * data.Power.y * atan2(dir.y, dir.x) * d;
                 }
             }
 

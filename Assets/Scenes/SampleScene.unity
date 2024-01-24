@@ -4877,6 +4877,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  _windDirection: {x: 0.7, y: 0, z: -0.7}
 --- !u!4 &353292886
 Transform:
   m_ObjectHideFlags: 0

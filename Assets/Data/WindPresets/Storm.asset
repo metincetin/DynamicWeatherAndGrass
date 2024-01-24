@@ -15,4 +15,4 @@ MonoBehaviour:
   _noiseScale: 0.002
   _windFrequency: 0.82
   _windChangePower: 0.8
-  _globalWindPower: 2.6
+  _globalWindPower: 5

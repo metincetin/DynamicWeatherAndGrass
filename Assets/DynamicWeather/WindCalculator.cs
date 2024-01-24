@@ -1,3 +1,4 @@
+using System.Security.AccessControl;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -42,6 +43,9 @@ public class WindCalculator : MonoBehaviour
     private List<WindManipulationData> _data;
     private ComputeBuffer _windManipulationComputeBuffer;
 
+    [SerializeField]
+    private Vector3 _windDirection;
+
     int _dataIndex;
 
     // Start is called before the first frame update
@@ -55,6 +59,7 @@ public class WindCalculator : MonoBehaviour
     {
         UpdateWindManipulationData();
         Dispatch();
+        Shader.SetGlobalVector("_WindDirection", _windDirection.normalized);
     }
 
     private void UpdateWindManipulationData()
