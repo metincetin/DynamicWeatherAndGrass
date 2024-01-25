@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Storm
   m_EditorClassIdentifier: 
   _noiseScale: 0.002
-  _windFrequency: 0.82
+  _windFrequency: 0.85
   _windChangePower: 0.8
-  _globalWindPower: 5
+  _globalWindPower: 8

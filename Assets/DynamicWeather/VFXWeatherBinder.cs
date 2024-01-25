@@ -18,7 +18,8 @@ public class VFXWeatherBinder : MonoBehaviour
     private void Update()
     {
         _effect.SetFloat("_GlobalWindPower", Shader.GetGlobalFloat("_GlobalWindPower"));
-        _effect.SetFloat("_WindDirection", Shader.GetGlobalFloat("_WindDirection"));
+        if (_effect.HasVector3("_WindDirection"))
+            _effect.SetVector3("_WindDirection", Shader.GetGlobalVector("_WindDirection"));
         if (_effect.HasFloat("_Rain"))
             _effect.SetFloat("_Rain", _weatherController.Rain);
         if (_effect.HasFloat("_Snow"))

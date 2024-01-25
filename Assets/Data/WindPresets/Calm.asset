@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Calm
   m_EditorClassIdentifier: 
   _noiseScale: 0.004
-  _windFrequency: 0.2
-  _windChangePower: 0.2
+  _windFrequency: 0.6
+  _windChangePower: 0.6
   _globalWindPower: 0.7

@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Mild
   m_EditorClassIdentifier: 
   _noiseScale: 0.003
-  _windFrequency: 0.3
-  _windChangePower: 0.24
+  _windFrequency: 0.7
+  _windChangePower: 0.64
   _globalWindPower: 1
