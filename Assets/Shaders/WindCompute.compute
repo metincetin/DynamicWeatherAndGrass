@@ -22,6 +22,7 @@ float _NoiseScale;
 float _WindChangePower;
 float _WindFrequency;
 float _Time;
+float3 _WindDirection;
 
 void Remap(float In, float2 InMinMax, float2 OutMinMax, out float Out)
 {
@@ -60,8 +61,13 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 			float2 pixelPosW;
             Remap(pos, float2(0, 512), worldSize, pixelPosW);
 
+            float2 offset = float2(
+                pos.x * _NoiseScale + _Time * _WindFrequency * _WindDirection.x,
+                pos.y * _NoiseScale + _Time * _WindFrequency * _WindDirection.z
+            );
+        
 
-            float3 noisePos = float3(pos.x * _NoiseScale + _Time * _WindFrequency, pos.y * _NoiseScale + _Time * _WindFrequency, _Time * _WindChangePower);
+            float3 noisePos = float3(offset.x, offset.y, _Time * _WindChangePower);
             float4 osx = openSimplex2Base(noisePos);
             Remap(osx, worldSize, float2(0,1), osx);
             osx.w = 0;

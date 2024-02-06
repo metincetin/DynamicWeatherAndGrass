@@ -45,6 +45,11 @@ public class WindCalculator : MonoBehaviour
 
     [SerializeField]
     private Vector3 _windDirection;
+    public Vector3 WindDirection
+    {
+        get => _windDirection;
+        set => _windDirection = value;
+    }
 
     int _dataIndex;
 
@@ -81,7 +86,7 @@ public class WindCalculator : MonoBehaviour
 
         RenderTexture.active = _texture;
 
-        GL.Clear(true, true, new Color(0,0,0,0));
+        GL.Clear(true, true, new Color(0, 0, 0, 0));
 
         RenderTexture.active = o;
 
@@ -90,6 +95,7 @@ public class WindCalculator : MonoBehaviour
         _shader.SetFloat("_Time", Time.time);
         _shader.SetFloat("_WindFrequency", _windFrequency);
         _shader.SetFloat("_WindChangePower", _windChangePower);
+        _shader.SetVector("_WindDirection", _windDirection);
 
         _shader.SetBuffer(0, "_WindManipulationBuffer", _windManipulationComputeBuffer);
 
