@@ -28,53 +28,65 @@ void Remap(float In, float2 InMinMax, float2 OutMinMax, out float Out)
     Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
 }
 
+void Remap(float2 In, float2 InMinMax, float2 OutMinMax, out float2 Out)
+{
+    Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
+}
+
+void Remap(float3 In, float2 InMinMax, float2 OutMinMax, out float3 Out)
+{
+    Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
+}
+
 void Remap(float4 In, float2 InMinMax, float2 OutMinMax, out float4 Out)
 {
     Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
+}
+
+float Falloff(float2 pos, float radius1, float radius2){
+	return saturate(length(pos) - radius1 - length(pos) - radius2);
 }
 
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     const int2 startPos = id.xy * 8;
+	const float2 worldSize = float2(-5, 5);
 
     for (int x = 0; x < 8;x++)
     {
         for (int y = 0; y < 8;y++){
             int2 pos = startPos + int2(x,y);
+			float2 pixelPosW;
+            Remap(pos, float2(0, 512), worldSize, pixelPosW);
+
 
             float3 noisePos = float3(pos.x * _NoiseScale + _Time * _WindFrequency, pos.y * _NoiseScale + _Time * _WindFrequency, _Time * _WindChangePower);
             float4 osx = openSimplex2Base(noisePos);
+            Remap(osx, worldSize, float2(0,1), osx);
             osx.w = 0;
-            Remap(osx, float2(-5, 5), float2(0,1), osx);
 
             for(int i = 0;i<_WindManipulationBuffer.Length;i++)
             {
                 WindManipulationData data = _WindManipulationBuffer[i];
-                float2 f3p = float2(pos.x, pos.y);
-                float4 f4tspace;
 
-                Remap(float4(data.Position.xz, 0,0), float2(-5, 5), float2(0, 512), f4tspace);
-                float2 positionTSpace = f4tspace.xy;
-
-                float dist = distance(positionTSpace, f3p);
-                float2 dir = normalize(f3p - positionTSpace);
-
-                float radiusRemapped;
-                Remap(data.Radius.x * data.Radius.y, float2(0, 10), float2(0, 512), radiusRemapped);
-
-                radiusRemapped *= 0.5;
-
-                float falloff = 1 / distance(dist, radiusRemapped) * 25;
+				float distW = distance(data.Position.xz, pixelPosW);
+                float2 dir = normalize(pixelPosW - data.Position.xz);
 
 
-                if (dist < radiusRemapped)
+				float radius = data.Radius.x * data.Radius.y;
+				float radiusN = data.Radius.y / data.Radius.x ;
+                float f1 = 1 / (distW * distW);
+                float f2 = distW + 1;
+				float falloff = saturate(smoothstep(data.Radius.x * 0.5,0,distance(radius, distW)));
+
+                if (distW < radius)
                 {
                     float shape = dot(dir, float2(0,1));
                     float d = step(data.Arc, shape);
 
                     //osx.xy += data.Power.x * data.Power.y * float4(dir, 0, 1) * falloff * d;
-                    osx.w += data.Power.x * data.Power.y * atan2(dir.y, dir.x) * d;
+                    osx.yw += data.Power.x * (data.Power.y) * dir *  d * falloff ;
                 }
             }
 

@@ -18,13 +18,13 @@ public class GrassDistortionContainer : MonoBehaviour
     private RenderTexture _tempEmission;
 
 
-    internal static void AddDistorter(GrassDistortion grassDistortion)
+    public static void AddDistorter(GrassDistortion grassDistortion)
     {
         if (!_distorters.Contains(grassDistortion))
             _distorters.Add(grassDistortion);
     }
 
-    internal static void RemoveDistorter(GrassDistortion grassDistortion)
+    public static void RemoveDistorter(GrassDistortion grassDistortion)
     {
         _distorters.Remove(grassDistortion);
     }

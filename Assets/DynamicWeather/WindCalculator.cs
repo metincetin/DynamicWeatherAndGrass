@@ -81,7 +81,7 @@ public class WindCalculator : MonoBehaviour
 
         RenderTexture.active = _texture;
 
-        GL.Clear(true, true, Color.black);
+        GL.Clear(true, true, new Color(0,0,0,0));
 
         RenderTexture.active = o;
 
